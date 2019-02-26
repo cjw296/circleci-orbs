@@ -2,14 +2,6 @@ version: 2.1
 description: Testing orbs...
 
 commands:
-  install-poetry:
-    steps:
-      - run:
-          name: "Install poetry"
-          command: |
-            curl -sSL https://raw.githubusercontent.com/sdispater/poetry/master/get-poetry.py | python
-            source $HOME/.poetry/env
-            echo 'export PATH=$HOME/.poetry/bin:$PATH' >> $BASH_ENV
   run-with-coverage:
     parameters:
       command:
@@ -33,11 +25,13 @@ jobs:
     parameters:
       image:
         type: string
+      command:
+        type: string
+        default: poetry run pytest
     docker:
       - image: << parameters.image >>
     steps:
       - checkout
-      - install-poetry
       - run:
           name: "Install Project"
           command: poetry install
@@ -46,7 +40,7 @@ jobs:
 
   coverage:
     docker:
-      - image: python:3.7
+      - image: circleci/python:3.7
     steps:
       - checkout
       - attach_workspace:
@@ -54,16 +48,15 @@ jobs:
       - run:
           name: "Check coverage"
           command: |
-            pip install coverage
+            sudo pip install coverage
             coverage combine coverage_output/
             coverage report --show-missing --skip-covered --fail-under=100
 
   release:
     docker:
-      - image: python:3.7
+      - image: circleci/python:3.7
     steps:
       - checkout
-      - install-poetry
       - run:
           name: "Release"
           command: |
