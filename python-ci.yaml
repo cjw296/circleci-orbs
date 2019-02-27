@@ -60,5 +60,5 @@ jobs:
       - run:
           name: "Release"
           command: |
-            pip install carthorse
+            sudo pip install carthorse
             carthorse
