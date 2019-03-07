@@ -53,6 +53,10 @@ jobs:
             coverage report --show-missing --fail-under=100
 
   release:
+    parameters:
+      config:
+        type: string
+        default: pyproject.toml
     docker:
       - image: circleci/python:3.7
     steps:
@@ -61,4 +65,4 @@ jobs:
           name: "Release"
           command: |
             sudo pip install carthorse
-            carthorse
+            carthorse --config << parameters.config >>
