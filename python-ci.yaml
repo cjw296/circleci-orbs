@@ -2,6 +2,7 @@ version: 2.1
 description: Tools for testing Python projects.
 
 commands:
+
   run-with-coverage:
     parameters:
       command:
@@ -20,7 +21,25 @@ commands:
             - .coverage.*
 
 
+  poetry-run-tests:
+    parameters:
+      prepare:
+        type: steps
+        default: []
+      command:
+        type: string
+        default: poetry run pytest --cov
+    steps:
+      - checkout
+      - run:
+          name: "Install Project"
+          command: poetry install
+      - steps: << parameters.prepare >>
+      - run-with-coverage:
+          command: << parameters.command >>
+
 jobs:
+
   poetry-run-tests:
     parameters:
       image:
@@ -28,14 +47,14 @@ jobs:
       command:
         type: string
         default: poetry run pytest --cov
+      prepare:
+        type: steps
+        default: []
     docker:
       - image: << parameters.image >>
     steps:
-      - checkout
-      - run:
-          name: "Install Project"
-          command: poetry install
-      - run-with-coverage:
+      - poetry-run-tests:
+          prepare: << parameters.prepare >>
           command: << parameters.command >>
 
   coverage:
