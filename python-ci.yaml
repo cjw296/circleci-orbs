@@ -34,14 +34,14 @@ commands:
       extra_packages:
         type: string
         default: ""
+      sudo:
+        default: true
+        type: boolean
     steps:
       - checkout
       - run:
           name: "Install Project"
-          command: "sudo pip install << parameters.extra_packages >> << parameters.install >>"
-      - steps: << parameters.prepare >>
-      - run-with-coverage:
-          command: << parameters.command >>
+          command: "<<# parameters.sudo >>sudo <</ parameters.sudo >>pip install << parameters.extra_packages >> << parameters.install >>"
 
   poetry-run-tests:
     parameters:
@@ -78,6 +78,9 @@ jobs:
       extra_packages:
         type: string
         default: ""
+      sudo:
+        default: true
+        type: boolean
     docker:
       - image: << parameters.image >>
     steps:
@@ -86,6 +89,7 @@ jobs:
           command: << parameters.command >>
           install: << parameters.install >>
           extra_packages: << parameters.extra_packages >>
+          sudo: << parameters.sudo >>
 
   poetry-run-tests:
     parameters:
