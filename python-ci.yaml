@@ -42,6 +42,9 @@ commands:
       - run:
           name: "Install Project"
           command: "<<# parameters.sudo >>sudo <</ parameters.sudo >>pip install << parameters.extra_packages >> << parameters.install >>"
+      - steps: << parameters.prepare >>
+      - run-with-coverage:
+          command: << parameters.command >>
 
   poetry-run-tests:
     parameters:
