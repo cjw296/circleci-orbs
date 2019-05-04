@@ -91,6 +91,12 @@ commands:
       extra_packages:
         type: string
         default: ""
+      expect_changelog:
+        type: boolean
+        default: true
+      editable:
+        type: boolean
+        default: false
     steps:
       - attach_workspace:
           at: dist
@@ -100,9 +106,12 @@ commands:
       - run:
           name: "Check LICENSE in source dist"
           command: "tar tzf dist/*.tar.gz | grep LICENSE"
-      - run:
-          name: "Check CHANGELOG in source dist"
-          command: "tar tzf dist/*.tar.gz | grep CHANGELOG"
+      - when:
+          condition: << parameters.expect_changelog >>
+          steps:
+            - run:
+                name: "Check CHANGELOG in source dist"
+                command: "tar tzf dist/*.tar.gz | grep CHANGELOG"
       - pip-install:
           package: "dist/*.whl"
           extra_packages: << parameters.extra_packages >>
