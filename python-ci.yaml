@@ -20,6 +20,30 @@ commands:
           paths:
             - .coverage.*
 
+  pip-install:
+    parameters:
+      extra_packages:
+        type: string
+        default: ""
+      editable:
+        type: boolean
+        default: false
+      package:
+        type: string
+        default: "."
+      extras:
+        type: string
+        default: ""
+    steps:
+      - run:
+          name: "Add .local/bin to $PATH"
+          command: |
+             echo 'export PATH=$HOME/.local/bin:$PATH' >> $BASH_ENV
+             source $HOME/.bashrc
+      - run:
+          name: "Install Project"
+          command: "pip install --user << parameters.extra_packages >> <<# parameters.editable >>-e <</ parameters.editable >><< parameters.package >><< parameters.extras >>"
+
   pip-run-tests:
     parameters:
       prepare:
@@ -28,20 +52,15 @@ commands:
       command:
         type: string
         default: pytest --cov
-      install:
-        type: string
-        default: "-e .[test]"
       extra_packages:
         type: string
         default: ""
-      sudo:
-        default: true
-        type: boolean
     steps:
       - checkout
-      - run:
-          name: "Install Project"
-          command: "<<# parameters.sudo >>sudo <</ parameters.sudo >>pip install << parameters.extra_packages >> << parameters.install >>"
+      - pip-install:
+          editable: true
+          extra_packages: << parameters.extra_packages >>
+          extras: "[test]"
       - steps: << parameters.prepare >>
       - run-with-coverage:
           command: << parameters.command >>
@@ -63,6 +82,39 @@ commands:
       - run-with-coverage:
           command: << parameters.command >>
 
+  check-package:
+    parameters:
+      package:
+        type: string
+      test:
+        type: steps
+      extra_packages:
+        type: string
+        default: ""
+    steps:
+      - attach_workspace:
+          at: dist
+      - run:
+          name: "Check LICENSE in wheel"
+          command: "unzip -l dist/*.whl | grep LICENSE"
+      - run:
+          name: "Check LICENSE in source dist"
+          command: "tar tzf dist/*.tar.gz | grep LICENSE"
+      - run:
+          name: "Check CHANGELOG in source dist"
+          command: "tar tzf dist/*.tar.gz | grep CHANGELOG"
+      - pip-install:
+          package: "dist/*.whl"
+          extra_packages: << parameters.extra_packages >>
+      - steps: << parameters.test >>
+      - run:
+          name: "Uninstall wheel"
+          command: "pip uninstall -y << parameters.package >>"
+      - pip-install:
+          extra_packages: << parameters.extra_packages >>
+          package: "dist/*.tar.gz"
+      - steps: << parameters.test >>
+
 jobs:
 
   pip-run-tests:
@@ -75,24 +127,52 @@ jobs:
       command:
         type: string
         default: pytest --cov
-      install:
-        type: string
-        default: "-e .[test]"
       extra_packages:
         type: string
         default: ""
-      sudo:
-        default: true
-        type: boolean
     docker:
       - image: << parameters.image >>
     steps:
       - pip-run-tests:
           prepare: << parameters.prepare >>
           command: << parameters.command >>
-          install: << parameters.install >>
           extra_packages: << parameters.extra_packages >>
-          sudo: << parameters.sudo >>
+
+  pip-docs:
+    docker:
+      - image: circleci/python:3.7
+    steps:
+      - checkout
+      - pip-install:
+          editable: true
+          extras: "[docs]"
+      - run:
+          name: "Build Docs"
+          command: |
+            python setup.py build_sphinx
+            rst2html.py --strict README.rst README.html
+      - store_artifacts:
+          path: build/sphinx/html
+          destination: docs
+
+  pip-setuptools-build-package:
+    docker:
+      - image: circleci/python:3.7
+    steps:
+      - checkout
+      - pip-install:
+          editable: true
+          extras: "[build]"
+      - run:
+          name: "Build Distributions"
+          command: "sudo python setup.py sdist bdist_wheel"
+      - persist_to_workspace:
+          root: dist
+          paths:
+            - "*"
+      - store_artifacts:
+          path: dist
+          destination: dist
 
   poetry-run-tests:
     parameters:
@@ -110,6 +190,22 @@ jobs:
       - poetry-run-tests:
           prepare: << parameters.prepare >>
           command: << parameters.command >>
+
+  poetry-build-package:
+    docker:
+      - image: circleci/python:3.7
+    steps:
+      - checkout
+      - run:
+          name: "Build Distributions"
+          command: "poetry build"
+      - persist_to_workspace:
+          root: dist
+          paths:
+            - "*"
+      - store_artifacts:
+          path: dist
+          destination: dist
 
   coverage:
     docker:
@@ -134,6 +230,11 @@ jobs:
       - image: circleci/python:3.7
     steps:
       - checkout
+      - attach_workspace:
+          at: dist
+      - run:
+          name: "Shows Distributions"
+          command: "ls -lah dist"
       - run:
           name: "Release"
           command: |
