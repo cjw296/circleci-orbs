@@ -76,6 +76,9 @@ commands:
     steps:
       - checkout
       - run:
+          name: "Downgrade virtualenv"
+          command: "sudo pip install -U 'virtualenv<20'"
+      - run:
           name: "Install Project"
           command: poetry install
       - steps: << parameters.prepare >>
