@@ -239,7 +239,7 @@ jobs:
         type: string
         default: pyproject.toml
     docker:
-      - image: circleci/python:3.7
+      - image: circleci/python:3.9
     steps:
       - checkout
       - attach_workspace:
