@@ -220,8 +220,12 @@ jobs:
           destination: dist
 
   coverage:
+    parameters:
+      image:
+        type: string
+        default: circleci/python:3.8
     docker:
-      - image: circleci/python:3.9
+      - image: << parameters.image >>
     steps:
       - checkout
       - attach_workspace:
