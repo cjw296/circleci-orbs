@@ -177,7 +177,7 @@ jobs:
           extras: "[build]"
       - run:
           name: "Build Distributions"
-          command: "sudo python setup.py sdist bdist_wheel"
+          command: "python setup.py sdist bdist_wheel"
       - persist_to_workspace:
           root: dist
           paths:
