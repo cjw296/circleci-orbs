@@ -230,7 +230,7 @@ jobs:
       - run:
           name: "Check coverage"
           command: |
-            sudo pip install coverage
+            pip install coverage
             coverage combine coverage_output/
             coverage report --show-missing --fail-under=100
 
@@ -251,5 +251,5 @@ jobs:
       - run:
           name: "Release"
           command: |
-            sudo pip install carthorse
+            pip install carthorse
             carthorse --config << parameters.config >>
