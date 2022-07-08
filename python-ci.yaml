@@ -55,12 +55,15 @@ commands:
       extra_packages:
         type: string
         default: ""
+      extras:
+        type: string
+        default: "[test]"
     steps:
       - checkout
       - pip-install:
           editable: true
           extra_packages: << parameters.extra_packages >>
-          extras: "[test]"
+          extras: << parameters.extras >>
       - steps: << parameters.prepare >>
       - run-with-coverage:
           command: << parameters.command >>
@@ -139,6 +142,9 @@ jobs:
       extra_packages:
         type: string
         default: ""
+      extras:
+        type: string
+        default: "[test]"
     docker:
       - image: << parameters.image >>
     steps:
@@ -146,6 +152,7 @@ jobs:
           prepare: << parameters.prepare >>
           command: << parameters.command >>
           extra_packages: << parameters.extra_packages >>
+          extras: << parameters.extras >>
 
   pip-docs:
     docker:
