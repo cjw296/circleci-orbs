@@ -159,6 +159,9 @@ jobs:
       extras:
         type: string
         default: "[test]"
+      python:
+        type: string
+        default: "python"
     docker:
       - image: << parameters.image >>
     steps:
@@ -167,6 +170,7 @@ jobs:
           command: << parameters.command >>
           extra_packages: << parameters.extra_packages >>
           extras: << parameters.extras >>
+          python: << parameters.python >>
 
   pip-docs:
     docker:
