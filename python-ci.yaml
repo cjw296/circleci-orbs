@@ -173,8 +173,21 @@ jobs:
           python: << parameters.python >>
 
   pip-docs:
+    parameters:
+      image:
+        type: string
+        default: "cimg/python:3.11"
+      python:
+        type: string
+        default: "python"
+      sourcedir:
+        type: string
+        default: "docs"
+      outdir:
+        type: string
+        default: "build/sphinx/html"
     docker:
-      - image: cimg/python:3.9
+      - image: cimg/python:3.11
     steps:
       - checkout
       - pip-install:
@@ -183,10 +196,10 @@ jobs:
       - run:
           name: "Build Docs"
           command: |
-            python setup.py build_sphinx -W --keep-going
+            << parameters.python >> -m sphinx -W --keep-going  << parameters.sourcedir >> << parameters.outdir >>
             rst2html.py --strict README.rst README.html
       - store_artifacts:
-          path: build/sphinx/html
+          path: << parameters.outdir >>
           destination: docs
 
   pip-setuptools-build-package:
