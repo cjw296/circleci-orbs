@@ -272,6 +272,29 @@ jobs:
             coverage combine coverage_output/
             coverage report --show-missing --fail-under=100
 
+  typing:
+    parameters:
+      packages:
+        type: string
+      image:
+        type: string
+        default: cimg/python:3.9
+      python:
+        type: string
+        default: "python"
+      extras:
+        type: string
+        default: "[test]"
+    docker:
+      - image: << parameters.image >>
+    steps:
+      - checkout
+      - pip-install:
+          python: << parameters.python >>
+          editable: true
+          extras: << parameters.extras >>
+      - run: "<< parameters.python >> -m mypy << parameters.packages >>"
+
   release:
     parameters:
       config:
