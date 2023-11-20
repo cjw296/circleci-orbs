@@ -42,13 +42,8 @@ commands:
         default: ""
     steps:
       - run:
-          name: "Add .local/bin to $PATH"
-          command: |
-             echo 'export PATH=$HOME/.local/bin:$PATH' >> $BASH_ENV
-             source $HOME/.bashrc
-      - run:
           name: "Install Project"
-          command: "<< parameters.python >> -m pip install --user << parameters.extra_packages >> <<# parameters.editable >>-e <</ parameters.editable >><< parameters.package >><< parameters.extras >>"
+          command: "<< parameters.python >> -m pip install << parameters.extra_packages >> <<# parameters.editable >>-e <</ parameters.editable >><< parameters.package >><< parameters.extras >>"
 
   pip-run-tests:
     parameters:
@@ -77,7 +72,7 @@ commands:
       - steps: << parameters.prepare >>
       - run-with-coverage:
           python: << parameters.python >>
-          command: << parameters.command >>
+          command: "<< parameters.python >> -m << parameters.command >>"
 
   poetry-run-tests:
     parameters:
