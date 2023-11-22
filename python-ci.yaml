@@ -192,7 +192,7 @@ jobs:
           name: "Build Docs"
           command: |
             << parameters.python >> -m sphinx -W --keep-going  << parameters.sourcedir >> << parameters.outdir >>
-            rst2html.py --strict README.rst README.html
+            << parameters.python >> -m docutils --strict  --strict README.rst README.html
       - store_artifacts:
           path: << parameters.outdir >>
           destination: docs
