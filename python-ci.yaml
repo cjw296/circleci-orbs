@@ -199,7 +199,7 @@ jobs:
 
   pip-setuptools-build-package:
     docker:
-      - image: cimg/python:3.9
+      - image: cimg/python:3.11
     steps:
       - checkout
       - pip-install:
@@ -235,7 +235,7 @@ jobs:
 
   poetry-build-package:
     docker:
-      - image: cimg/python:3.9
+      - image: cimg/python:3.11
     steps:
       - checkout
       - run:
@@ -253,7 +253,7 @@ jobs:
     parameters:
       image:
         type: string
-        default: cimg/python:3.9
+        default: cimg/python:3.11
     docker:
       - image: << parameters.image >>
     steps:
@@ -273,7 +273,7 @@ jobs:
         type: string
       image:
         type: string
-        default: cimg/python:3.9
+        default: cimg/python:3.11
       python:
         type: string
         default: "python"
@@ -296,7 +296,7 @@ jobs:
         type: string
         default: pyproject.toml
     docker:
-      - image: cimg/python:3.9
+      - image: cimg/python:3.11
     steps:
       - checkout
       - attach_workspace:
