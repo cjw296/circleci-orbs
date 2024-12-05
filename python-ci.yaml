@@ -74,23 +74,6 @@ commands:
           python: << parameters.python >>
           command: "<< parameters.python >> -m << parameters.command >>"
 
-  poetry-run-tests:
-    parameters:
-      prepare:
-        type: steps
-        default: []
-      command:
-        type: string
-        default: poetry run pytest --cov
-    steps:
-      - checkout
-      - run:
-          name: "Install Project"
-          command: poetry install
-      - steps: << parameters.prepare >>
-      - run-with-coverage:
-          command: << parameters.command >>
-
   check-package:
     parameters:
       python:
@@ -212,43 +195,6 @@ jobs:
       - run:
           name: "Build Distributions"
           command: "python setup.py sdist bdist_wheel"
-      - persist_to_workspace:
-          root: dist
-          paths:
-            - "*"
-      - store_artifacts:
-          path: dist
-          destination: dist
-
-  poetry-run-tests:
-    parameters:
-      image:
-        type: string
-      command:
-        type: string
-        default: poetry run pytest --cov
-      prepare:
-        type: steps
-        default: []
-    docker:
-      - image: << parameters.image >>
-    steps:
-      - poetry-run-tests:
-          prepare: << parameters.prepare >>
-          command: << parameters.command >>
-
-  poetry-build-package:
-    parameters:
-      image:
-        type: string
-        default: cimg/python:3.11
-    docker:
-      - image: << parameters.image >>
-    steps:
-      - checkout
-      - run:
-          name: "Build Distributions"
-          command: "poetry build"
       - persist_to_workspace:
           root: dist
           paths:
