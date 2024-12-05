@@ -89,12 +89,30 @@ commands:
       expect_changelog:
         type: boolean
         default: true
-      editable:
+      typed:
         type: boolean
         default: false
     steps:
       - attach_workspace:
           at: dist
+      - run:
+          name: "Shows Distributions"
+          command: "ls -lah dist"
+      - run:
+          name: "Shows wheel contents"
+          command: "unzip -l dist/*.whl"
+      - run:
+          name: "Shows sdist contents"
+          command: "tar tzf dist/*.tar.gz"
+      - when:
+          condition: << parameters.typed >>
+          steps:
+          - run:
+              name: "Check py.typed in wheel"
+              command: "unzip -l dist/*.whl | grep << parameters.package >>/py.typed"
+          - run:
+              name: "Check py.typed in source dist"
+              command: "tar tzf dist/*.tar.gz | grep << parameters.package >>/py.typed"
       - run:
           name: "Check LICENSE in wheel"
           command: "unzip -l dist/*.whl | grep LICENSE"
@@ -115,8 +133,8 @@ commands:
           name: "Uninstall wheel"
           command: "<< parameters.python >> -m pip uninstall -y << parameters.package >>"
       - pip-install:
-          extra_packages: << parameters.extra_packages >>
           package: "dist/*.tar.gz"
+          extra_packages: << parameters.extra_packages >>
       - steps: << parameters.test >>
 
 jobs:
@@ -243,6 +261,36 @@ jobs:
           editable: true
           extras: << parameters.extras >>
       - run: "<< parameters.python >> -m mypy << parameters.packages >>"
+
+  check-package:
+    parameters:
+      image:
+        type: string
+        default: cimg/python:3.11
+      python:
+        type: string
+        default: "python"
+      package:
+        type: string
+      extra_packages:
+        type: string
+        default: ""
+      typed:
+        type: boolean
+        default: false
+    docker:
+      - image: << parameters.image >>
+    steps:
+      - attach_workspace:
+          at: dist
+      - check-package:
+          python: <<  parameters.python >>
+          package: <<  parameters.package >>
+          typed: << parameters.typed >>
+          test:
+            - run:
+                name: "Import package"
+                command: python -c "import << parameters.package >>"
 
   release:
     parameters:
