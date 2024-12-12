@@ -209,10 +209,10 @@ jobs:
       - checkout
       - pip-install:
           editable: true
-          extras: "[build]"
+          extra_packages: "setuptools-git build"
       - run:
           name: "Build Distributions"
-          command: "python setup.py sdist bdist_wheel"
+          command: "python -m build"
       - persist_to_workspace:
           root: dist
           paths:
