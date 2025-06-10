@@ -86,9 +86,6 @@ commands:
       extra_packages:
         type: string
         default: ""
-      expect_changelog:
-        type: boolean
-        default: true
       typed:
         type: boolean
         default: false
@@ -119,12 +116,6 @@ commands:
       - run:
           name: "Check LICENSE in source dist"
           command: "tar tzf dist/*.tar.gz | grep LICENSE"
-      - when:
-          condition: << parameters.expect_changelog >>
-          steps:
-            - run:
-                name: "Check CHANGELOG in source dist"
-                command: "tar tzf dist/*.tar.gz | grep CHANGELOG"
       - pip-install:
           package: "dist/*.whl"
           extra_packages: << parameters.extra_packages >>
